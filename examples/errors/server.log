@@ -1,0 +1,255 @@
+2025/05/01 06:21:29 [STD] Creating new standard HTTP server on port 8080
+2025/05/01 06:21:29 [STD] Adding middleware: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1
+2025/05/01 06:21:29 [STD] Adding middleware: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1
+Server running on :8080
+Try the following endpoints:
+  - http://localhost:8080/ (help)
+  - http://localhost:8080/bad-request
+  - http://localhost:8080/unauthorized
+  - http://localhost:8080/forbidden
+  - http://localhost:8080/not-found
+  - http://localhost:8080/conflict
+  - http://localhost:8080/internal-error
+  - http://localhost:8080/service-unavailable
+  - http://localhost:8080/custom-error
+  - http://localhost:8080/from-http-error
+  - http://localhost:8080/error-method
+  - http://localhost:8080/multiple-errors
+New error structs that embed the error interface:
+  - http://localhost:8080/new-bad-request
+  - http://localhost:8080/new-unauthorized
+  - http://localhost:8080/new-forbidden
+  - http://localhost:8080/new-not-found
+  - http://localhost:8080/new-internal-error
+  - http://localhost:8080/new-service-unavailable
+Custom error struct that inherits from BadRequestHttpError:
+  - http://localhost:8080/invalid-request-param
+2025/05/01 06:21:29 [STD] Server starting on :8080
+2025/05/01 06:21:29 [STD] Using standard net/http package
+2025/05/01 06:21:29 [STD] Middleware registered:
+2025/05/01 06:21:29 [STD]   1. github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1
+2025/05/01 06:21:29 [STD]   2. github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1
+2025/05/01 06:21:29 [STD] Routes registered:
+2025/05/01 06:21:29 [STD]   1. GET /new-bad-request
+2025/05/01 06:21:29 [STD]   2. GET /new-forbidden
+2025/05/01 06:21:29 [STD]   3. GET /new-not-found
+2025/05/01 06:21:29 [STD]   4. GET /
+2025/05/01 06:21:29 [STD]   5. GET /custom-error
+2025/05/01 06:21:29 [STD]   6. GET /error-method
+2025/05/01 06:21:29 [STD]   7. GET /from-http-error
+2025/05/01 06:21:29 [STD]   8. GET /multiple-errors
+2025/05/01 06:21:29 [STD]   9. GET /new-unauthorized
+2025/05/01 06:21:29 [STD]   10. GET /bad-request
+2025/05/01 06:21:29 [STD]   11. GET /forbidden
+2025/05/01 06:21:29 [STD]   12. GET /conflict
+2025/05/01 06:21:29 [STD]   13. GET /not-found
+2025/05/01 06:21:29 [STD]   14. GET /service-unavailable
+2025/05/01 06:21:29 [STD]   15. GET /new-service-unavailable
+2025/05/01 06:21:29 [STD]   16. GET /unauthorized
+2025/05/01 06:21:29 [STD]   17. GET /internal-error
+2025/05/01 06:21:29 [STD]   18. GET /new-internal-error
+2025/05/01 06:21:29 [STD] Server is ready to handle requests
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/",
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "none",
+  "request_id": "1746048090536750000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /bad-request
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /bad-request
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/bad-request",
+  "protocol": "HTTP/1.1",
+  "status_code": 400,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 400",
+  "request_id": "1746048090547320000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /unauthorized
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /unauthorized
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/unauthorized",
+  "protocol": "HTTP/1.1",
+  "status_code": 401,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 401",
+  "request_id": "1746048090557393000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /forbidden
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /forbidden
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/forbidden",
+  "protocol": "HTTP/1.1",
+  "status_code": 403,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 403",
+  "request_id": "1746048090569562000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /not-found
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /not-found
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/not-found",
+  "protocol": "HTTP/1.1",
+  "status_code": 404,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 404",
+  "request_id": "1746048090577662000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /conflict
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /conflict
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/conflict",
+  "protocol": "HTTP/1.1",
+  "status_code": 409,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 409",
+  "request_id": "1746048090585851000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /internal-error
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /internal-error
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/internal-error",
+  "protocol": "HTTP/1.1",
+  "status_code": 500,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 500",
+  "request_id": "1746048090594934000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /service-unavailable
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /service-unavailable
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/service-unavailable",
+  "protocol": "HTTP/1.1",
+  "status_code": 503,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 503",
+  "request_id": "1746048090604417000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /custom-error
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /custom-error
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/custom-error",
+  "protocol": "HTTP/1.1",
+  "status_code": 418,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 418",
+  "request_id": "1746048090612997000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /from-http-error
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /from-http-error
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/from-http-error",
+  "protocol": "HTTP/1.1",
+  "status_code": 400,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "HTTP error: 400",
+  "request_id": "1746048090622067000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 http: superfluous response.WriteHeader call from github.com/tenqube/tenqube-go-http-server/core/std.(*errorCaptureWriter).WriteHeader (errorhandler.go:92)
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /error-method
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /error-method
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/error-method",
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "none",
+  "request_id": "1746048090630826000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /multiple-errors
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /multiple-errors
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/multiple-errors",
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "none",
+  "request_id": "1746048090641455000",
+  "authorization": ""
+}
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*ErrorHandlerMiddleware).Middleware.func1 for GET /
+2025/05/01 06:21:30 [STD] Middleware registered: github.com/tenqube/tenqube-go-http-server/core/std.(*LoggingMiddleware).Middleware.func1 for GET /
+{
+  "client_ip": "[::1]",
+  "timestamp": "2025-05-01T06:21:30+09:00",
+  "method": "GET",
+  "path": "/invalid-request-param",
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "latency": 0,
+  "user_agent": "curl/8.7.1",
+  "error": "none",
+  "request_id": "1746048090649998000",
+  "authorization": ""
+}

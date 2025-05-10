@@ -1,0 +1,67 @@
+name: Version Check
+
+on:
+  pull_request:
+    paths-ignore:
+      - .github/**
+      - docs/**
+      - examples/**
+    branches:
+      - main
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.2'
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Fetch main branch
+        run: git fetch origin main
+
+      - name: Extract and compare versions
+        run: |
+          if [ -f version.go ]; then
+            PR_VERSION=$(grep -oP 'Version = "\K[^"]+' version.go)
+          else
+            echo "Error: version.go does not exist in the PR branch."
+            exit 1
+          fi
+          echo "PR_VERSION=$PR_VERSION" >> $GITHUB_ENV
+
+          git checkout origin/main
+          if [ -f version.go ]; then
+            MAIN_VERSION=$(grep -oP 'Version = "\K[^"]+' version.go)
+          else
+            echo "Error: version.go does not exist in the main branch."
+            exit 1
+          fi
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
+
+          IFS='.' read -r -a PR_PARTS <<< "$PR_VERSION"
+          IFS='.' read -r -a MAIN_PARTS <<< "$MAIN_VERSION"
+
+          if [[ ${PR_PARTS[0]} -gt ${MAIN_PARTS[0]} ]]; then exit 0; fi
+          if [[ ${PR_PARTS[0]} -lt ${MAIN_PARTS[0]} ]]; then exit 1; fi
+          if [[ ${PR_PARTS[1]} -gt ${MAIN_PARTS[1]} ]]; then exit 0; fi
+          if [[ ${PR_PARTS[1]} -lt ${MAIN_PARTS[1]} ]]; then exit 1; fi
+          if [[ ${PR_PARTS[2]} -gt ${MAIN_PARTS[2]} ]]; then exit 0; fi
+          if [[ ${PR_PARTS[2]} -lt ${MAIN_PARTS[2]} ]]; then exit 1; fi
+          echo "Error: PR version is the same as the main branch version."
+          exit 1
+
+      - name: Validate semantic versioning
+        run: |
+          if ! [[ "${{ env.PR_VERSION }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: The version (${{ env.PR_VERSION }}) does not follow semantic versioning (MAJOR.MINOR.PATCH)."
+            exit 1
+          fi
+          echo "Semantic version validation passed: ${{ env.PR_VERSION }}"
