@@ -35,11 +35,11 @@ func main() {
 
 ```go
 loggingConfig := &server.LoggingConfig{
-CustomFields: map[string]string{
-"environment": "development",
-"version":     "0.0.1",
-"app_name":    "my-awesome-app",
-},
+    CustomFields: map[string]string{
+        "environment": "development",
+        "version":     "0.0.1",
+        "app_name":    "my-awesome-app",
+    },
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(loggingConfig))
@@ -51,12 +51,12 @@ s.Use(loggingMiddleware.Middleware(loggingConfig))
 
 ```go
 remoteLoggingConfig := &server.LoggingConfig{
-RemoteURL: "https://your-logging-service.com/api/logs",
-LoggingToRemote: true,
-CustomFields: map[string]string{
-"environment": "production",
-"version":     "0.0.1",
-},
+    RemoteURL: "https://your-logging-service.com/api/logs",
+    LoggingToRemote: true,
+    CustomFields: map[string]string{
+        "environment": "production",
+        "version":     "0.0.1",
+    },
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(remoteLoggingConfig))
@@ -70,16 +70,16 @@ s.Use(loggingMiddleware.Middleware(remoteLoggingConfig))
 
 ```go
 loggingConfig := &server.LoggingConfig{
-SkipPaths: []string{
-"/health",
-"/metrics",
-"/favicon.ico",
-"/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
-"/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
-},
-CustomFields: map[string]string{
-"version": "0.0.1",
-},
+    SkipPaths: []string{
+        "/health",
+        "/metrics",
+        "/favicon.ico",
+        "/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
+        "/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
+    },
+    CustomFields: map[string]string{
+        "version": "0.0.1",
+    },
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(loggingConfig))
@@ -102,35 +102,35 @@ s.Use(loggingMiddleware.Middleware(loggingConfig))
 ```go
 // 콘솔에만 로그 출력 (기본값)
 consoleOnlyConfig := &server.LoggingConfig{
-LoggingToConsole: true,
-LoggingToRemote: false,
-CustomFields: map[string]string{
-"version": "0.0.1",
-},
+    LoggingToConsole: true,
+    LoggingToRemote: false,
+    CustomFields: map[string]string{
+        "version": "0.0.1",
+    },
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(consoleOnlyConfig))
 
 // 원격 URL에만 로그 출력
 remoteOnlyConfig := &server.LoggingConfig{
-LoggingToConsole: false,
-LoggingToRemote: true,
-RemoteURL: "https://your-logging-service.com/api/logs",
-CustomFields: map[string]string{
-"version": "0.0.1",
-},
+    LoggingToConsole: false,
+    LoggingToRemote: true,
+    RemoteURL: "https://your-logging-service.com/api/logs",
+    CustomFields: map[string]string{
+        "version": "0.0.1",
+    },
 }
 loggingMiddleware = s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(remoteOnlyConfig))
 
 // 콘솔과 원격 URL 모두에 로그 출력
 bothConfig := &server.LoggingConfig{
-LoggingToConsole: true,
-LoggingToRemote: true,
-RemoteURL: "https://your-logging-service.com/api/logs",
-CustomFields: map[string]string{
-"version": "0.0.1",
-},
+    LoggingToConsole: true,
+    LoggingToRemote: true,
+    RemoteURL: "https://your-logging-service.com/api/logs",
+    CustomFields: map[string]string{
+        "version": "0.0.1",
+    },
 }
 loggingMiddleware = s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(bothConfig))
@@ -174,18 +174,18 @@ s.Use(loggingMiddleware.Middleware(server.DefaultLoggingConfig()))
 
 ```go
 type ApiLog struct {
-ClientIp      string            `json:"client_ip"`
-Timestamp     string            `json:"timestamp"`
-Method        string            `json:"method"`
-Path          string            `json:"path"`
-Protocol      string            `json:"protocol"`
-StatusCode    int               `json:"status_code"`
-Latency       int64             `json:"latency"`
-UserAgent     string            `json:"user_agent"`
-Error         string            `json:"error"`
-RequestId     string            `json:"request_id"`
-Authorization string            `json:"authorization"`
-CustomFields  map[string]string `json:"custom_fields,omitempty"`
+    ClientIp      string            `json:"client_ip"`
+    Timestamp     string            `json:"timestamp"`
+    Method        string            `json:"method"`
+    Path          string            `json:"path"`
+    Protocol      string            `json:"protocol"`
+    StatusCode    int               `json:"status_code"`
+    Latency       int64             `json:"latency"`
+    UserAgent     string            `json:"user_agent"`
+    Error         string            `json:"error"`
+    RequestId     string            `json:"request_id"`
+    Authorization string            `json:"authorization"`
+    CustomFields  map[string]string `json:"custom_fields,omitempty"`
 }
 ```
 
@@ -325,29 +325,8 @@ s.Use(s.GetLoggingMiddleware().Middleware(nil))
 
 ### 상태 코드 및 지연 시간 로깅 문제
 
-v0.4.7 이전 버전에서는 일반 미들웨어 구현(`server.LoggingMiddleware`)에서 상태 코드가 실제로는 500 오류가 발생했는데도 200으로 로깅되고, 지연 시간(latency)이 0으로 로깅되는 문제가 있었습니다. 이 문제는 다음과 같은 이유로 발생했습니다:
-
-1. 미들웨어가 `c.Next()`를 호출하여 다음 핸들러를 실행한 후, 즉시 지연 시간을 계산하고 상태 코드를 캡처했습니다.
-2. 그러나 `c.Next()`는 다음 핸들러가 완료될 때까지 블록하지 않고, 단순히 제어를 다음 핸들러로 넘기고 계속 실행됩니다.
-3. 이로 인해 핸들러가 완료되기 전에 지연 시간 계산과 상태 코드 캡처가 이루어져, 지연 시간이 0으로 기록되고 기본 상태 코드인 200이 로깅되었습니다.
-
-v0.4.7부터는 이 문제를 해결하기 위해 다음과 같은 변경이 이루어졌습니다:
-
 1. 지연 시간 계산과 상태 코드 캡처를 `defer` 함수로 이동하여 핸들러가 완료된 후에 실행되도록 했습니다.
 2. `c.Next()` 호출 후 작은 지연(1 나노초)을 추가하여 `defer` 함수가 핸들러 완료 후에 실행되도록 보장했습니다.
 
 이 변경으로 인해 상태 코드와 지연 시간이 정확하게 로깅됩니다. 특히 오류가 발생한 경우 실제 오류 상태 코드(예: 500)가 로그에 정확히 반영됩니다.
 
-### 프레임워크별 로깅 미들웨어 사용 권장
-
-v0.4.8부터는 상태 코드를 정확하게 캡처하기 위해 프레임워크별 로깅 미들웨어를 사용하는 것이 권장됩니다. 일반 미들웨어 구현은 더 이상 지원되지 않으므로, 항상 프레임워크별 로깅 미들웨어를 사용해야 합니다.
-
-프레임워크별 로깅 미들웨어를 사용하려면 다음과 같이 `srv.GetLoggingMiddleware().Middleware`를 사용하세요:
-
-```go
-// 권장 방식 (항상 상태 코드를 정확하게 캡처)
-loggingMiddleware := srv.GetLoggingMiddleware()
-srv.Use(loggingMiddleware.Middleware(loggingConfig))
-```
-
-프레임워크별 로깅 미들웨어는 해당 프레임워크의 응답 작성자를 올바르게 래핑하여 상태 코드를 정확하게 캡처합니다. 이는 특히 400, 500 등의 오류 상태 코드를 로깅할 때 중요합니다.
