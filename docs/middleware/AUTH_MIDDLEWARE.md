@@ -31,39 +31,39 @@ type UserLookupInterface interface {
 
 ```go
 type UserService struct {
-// 사용자 저장소 (예: 데이터베이스)
-users map[string]User
+    // 사용자 저장소 (예: 데이터베이스)
+    users map[string]User
 }
 
 func (s *UserService) LookupUserByBasicAuth(username, password string) (interface{}, error) {
-// 사용자 이름으로 사용자 조회
-user, exists := s.users[username]
-if !exists {
-return nil, errors.New("user not found")
-}
+    // 사용자 이름으로 사용자 조회
+    user, exists := s.users[username]
+    if !exists {
+        return nil, errors.New("user not found")
+    }
 
-// 비밀번호 확인 (실제 앱에서는 적절한 비밀번호 해싱 사용)
-if !verifyPassword(user.PasswordHash, password) {
-return nil, errors.New("invalid password")
-}
+    // 비밀번호 확인 (실제 앱에서는 적절한 비밀번호 해싱 사용)
+    if !verifyPassword(user.PasswordHash, password) {
+        return nil, errors.New("invalid password")
+    }
 
-return user, nil
+    return user, nil
 }
 
 func (s *UserService) LookupUserByJWT(claims MapClaims) (interface{}, error) {
-// 클레임에서 사용자 ID 또는 사용자 이름 추출
-sub, ok := claims["sub"].(string)
-if !ok {
-return nil, errors.New("invalid token: missing subject")
-}
+    // 클레임에서 사용자 ID 또는 사용자 이름 추출
+    sub, ok := claims["sub"].(string)
+    if !ok {
+        return nil, errors.New("invalid token: missing subject")
+    }
 
-// 사용자 조회
-user, exists := s.users[sub]
-if !exists {
-return nil, errors.New("user not found")
-}
+    // 사용자 조회
+    user, exists := s.users[sub]
+    if !exists {
+        return nil, errors.New("user not found")
+    }
 
-return user, nil
+    return user, nil
 }
 ```
 
@@ -77,16 +77,16 @@ return user, nil
 
 ```go
 authConfig := &server.AuthConfig{
-UserLookup: userService,
-AuthType:   server.AuthTypeJWT,
-JWTSecret:  "your-secret-key",
-SkipPaths: []string{
-"/health",
-"/metrics",
-"/public",
-"/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
-"/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
-},
+    UserLookup: userService,
+    AuthType:   server.AuthTypeJWT,
+    JWTSecret:  "your-secret-key",
+    SkipPaths: []string{
+        "/health",
+        "/metrics",
+        "/public",
+        "/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
+        "/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
+    },
 }
 s.Use(server.AuthMiddleware(authConfig))
 ```
@@ -160,23 +160,23 @@ userService := NewUserService()
 
 // 기본 인증을 위한 인증 미들웨어 구성
 basicAuthConfig := &server.AuthConfig{
-UserLookup: userService,
-AuthType:   server.AuthTypeBasic,
-
-// 선택 사항: 사용자 정의 오류 메시지
-UnauthorizedMessage: "Authentication required",
-ForbiddenMessage:    "Access denied",
+    UserLookup: userService,
+    AuthType:   server.AuthTypeBasic,
+    
+    // 선택 사항: 사용자 정의 오류 메시지
+    UnauthorizedMessage: "Authentication required",
+    ForbiddenMessage:    "Access denied",
 }
-
+    
 // 또는 JWT 인증을 위한 인증 미들웨어 구성
 jwtAuthConfig := &server.AuthConfig{
-UserLookup: userService,
-AuthType:   server.AuthTypeJWT,
-JWTSecret:  "your-secret-key",
-
-// 선택 사항: 사용자 정의 오류 메시지
-UnauthorizedMessage: "Authentication required",
-ForbiddenMessage:    "Access denied",
+    UserLookup: userService,
+    AuthType:   server.AuthTypeJWT,
+    JWTSecret:  "your-secret-key",
+    
+    // 선택 사항: 사용자 정의 오류 메시지
+    UnauthorizedMessage: "Authentication required",
+    ForbiddenMessage:    "Access denied",
 }
 
 // 라우트 그룹에 미들웨어 추가
@@ -197,26 +197,26 @@ server.GET("/protected-jwt", server.AuthMiddleware(jwtAuthConfig), handleProtect
 
 ```go
 func handleProtectedRoute(c server.Context) {
-// 컨텍스트에서 인증된 사용자 가져오기
-user, ok := server.GetUserFromContext(c.Request().Context())
-if !ok {
-c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
-return
-}
+    // 컨텍스트에서 인증된 사용자 가져오기
+    user, ok := server.GetUserFromContext(c.Request().Context())
+    if !ok {
+        c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+        return
+    }
 
-// 사용자 타입으로 타입 변환
-u, ok := user.(User)
-if !ok {
-c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
-return
-}
+    // 사용자 타입으로 타입 변환
+    u, ok := user.(User)
+    if !ok {
+        c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+        return
+    }
 
-// 사용자 데이터 사용
-c.JSON(http.StatusOK, map[string]interface{}{
-"id":       u.ID,
-"username": u.Username,
-"role":     u.Role,
-})
+    // 사용자 데이터 사용
+    c.JSON(http.StatusOK, map[string]interface{}{
+        "id":       u.ID,
+        "username": u.Username,
+        "role":     u.Role,
+    })
 }
 ```
 
