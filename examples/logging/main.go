@@ -45,8 +45,10 @@ func main() {
 		},
 		// Paths to skip for logging
 		SkipPaths: []string{
-			"/health",
-			"/favicon.ico",
+			"/health",                // Exact path match
+			"/favicon.ico",           // Exact path match
+			"/metrics/*",             // Wildcard pattern - matches all paths starting with /metrics/
+			"/api/users/:id/private", // Parameter pattern - matches paths like /api/users/123/private
 		},
 	}
 	srv.Use(srv.GetLoggingMiddleware().Middleware(loggingConfig))
@@ -112,9 +114,27 @@ func main() {
 		})
 	})
 
-	// Health check route - will be skipped by the logging middleware
+	// Health check route - will be skipped by the logging middleware (exact path match)
 	srv.GET("/health", func(c server.Context) {
 		c.String(http.StatusOK, "OK")
+	})
+
+	// Metrics routes - will be skipped by the logging middleware (wildcard pattern)
+	srv.GET("/metrics/basic", func(c server.Context) {
+		c.String(http.StatusOK, "Basic metrics - This request will NOT be logged due to wildcard pattern")
+	})
+
+	srv.GET("/metrics/advanced", func(c server.Context) {
+		c.String(http.StatusOK, "Advanced metrics - This request will NOT be logged due to wildcard pattern")
+	})
+
+	// User private data route - will be skipped by the logging middleware (parameter pattern)
+	srv.GET("/api/users/123/private", func(c server.Context) {
+		c.String(http.StatusOK, "User 123 private data - This request will NOT be logged due to parameter pattern")
+	})
+
+	srv.GET("/api/users/456/private", func(c server.Context) {
+		c.String(http.StatusOK, "User 456 private data - This request will NOT be logged due to parameter pattern")
 	})
 
 	// Add a route that explains how to test the logging middleware
@@ -129,13 +149,21 @@ Available endpoints:
 - GET /json     - Returns a JSON response (logged)
 - GET /error    - Returns an error response (logged with error status)
 - GET /slow     - Returns a response after a 1-second delay (logged with latency)
-- GET /health   - Health check endpoint (not logged due to SkipPaths)
+- GET /health   - Health check endpoint (not logged - exact path match)
+- GET /metrics/basic    - Basic metrics endpoint (not logged - wildcard pattern)
+- GET /metrics/advanced - Advanced metrics endpoint (not logged - wildcard pattern)
+- GET /api/users/123/private - User private data (not logged - parameter pattern)
+- GET /api/users/456/private - Another user private data (not logged - parameter pattern)
 - GET /help     - This help page (logged)
 
 The logging middleware is configured to:
 1. Log requests to the console
 2. Include custom fields (environment, version, app_name)
-3. Skip requests to /health and /favicon.ico
+3. Skip requests to:
+   - /health (exact path match)
+   - /favicon.ico (exact path match)
+   - /metrics/* (wildcard pattern - all paths starting with /metrics/)
+   - /api/users/:id/private (parameter pattern - paths like /api/users/123/private)
 
 Check your console to see the logs for each request.
 `

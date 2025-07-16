@@ -15,6 +15,7 @@ import (
 
 	"github.com/mythofleader/go-http-server/core"
 	httperrors "github.com/mythofleader/go-http-server/core/middleware/errors"
+	"github.com/mythofleader/go-http-server/core/middleware/util"
 )
 
 // MapClaims represents JWT claims as a map
@@ -165,11 +166,8 @@ func AuthMiddleware(config *AuthConfig) core.HandlerFunc {
 		path := c.Request().URL.Path
 
 		// Check if the path is in the skip paths list
-		for _, ignorePath := range config.SkipPaths {
-			if path == ignorePath {
-				// Skip authentication for this path
-				return
-			}
+		if util.IsSkipPaths(path, config.SkipPaths) {
+			return
 		}
 
 		// Get the Authorization header

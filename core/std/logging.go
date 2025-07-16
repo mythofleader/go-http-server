@@ -8,6 +8,7 @@ import (
 
 	"github.com/mythofleader/go-http-server/core"
 	"github.com/mythofleader/go-http-server/core/middleware"
+	"github.com/mythofleader/go-http-server/core/middleware/util"
 )
 
 // ResponseWriterWrapper is a wrapper for http.ResponseWriter that captures the status code.
@@ -62,12 +63,9 @@ func (m *LoggingMiddleware) Middleware(config *core.LoggingConfig) core.HandlerF
 			path := c.Request().URL.Path
 
 			// Check if the path is in the skip paths list
-			for _, skipPath := range config.SkipPaths {
-				if path == skipPath {
-					// Skip logging for this path
-					c.Next()
-					return
-				}
+			if util.IsSkipPaths(path, config.SkipPaths) {
+				c.Next()
+				return
 			}
 
 			// Start timer
