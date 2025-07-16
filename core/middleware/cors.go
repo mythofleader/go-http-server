@@ -105,6 +105,7 @@ func CORSMiddleware(config *CORSConfig) core.HandlerFunc {
 		// Handle preflight requests
 		if c.Request().Method == "OPTIONS" {
 			c.SetStatus(http.StatusOK)
+			c.Abort()
 			return
 		}
 

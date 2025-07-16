@@ -78,6 +78,9 @@ type Context interface {
 	// Next calls the next handler in the chain.
 	// This is used for middleware flow control.
 	Next()
+	// Abort prevents pending handlers in the chain from being called.
+	// This is used to stop the middleware chain execution.
+	Abort()
 	// Get returns the value for the given key and a boolean indicating whether the key exists.
 	// This is used to retrieve values stored in the context.
 	Get(key string) (interface{}, bool)
