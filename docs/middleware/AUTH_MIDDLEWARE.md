@@ -19,11 +19,11 @@
 
 ```go
 type UserLookupInterface interface {
-    // LookupUserByBasicAuth looks up a user by username and password
-    LookupUserByBasicAuth(username, password string) (interface{}, error)
+// LookupUserByBasicAuth looks up a user by username and password
+LookupUserByBasicAuth(username, password string) (interface{}, error)
 
-    // LookupUserByJWT looks up a user by JWT claims
-    LookupUserByJWT(claims MapClaims) (interface{}, error)
+// LookupUserByJWT looks up a user by JWT claims
+LookupUserByJWT(claims MapClaims) (interface{}, error)
 }
 ```
 
@@ -31,39 +31,39 @@ type UserLookupInterface interface {
 
 ```go
 type UserService struct {
-    // 사용자 저장소 (예: 데이터베이스)
-    users map[string]User
+// 사용자 저장소 (예: 데이터베이스)
+users map[string]User
 }
 
 func (s *UserService) LookupUserByBasicAuth(username, password string) (interface{}, error) {
-    // 사용자 이름으로 사용자 조회
-    user, exists := s.users[username]
-    if !exists {
-        return nil, errors.New("user not found")
-    }
+// 사용자 이름으로 사용자 조회
+user, exists := s.users[username]
+if !exists {
+return nil, errors.New("user not found")
+}
 
-    // 비밀번호 확인 (실제 앱에서는 적절한 비밀번호 해싱 사용)
-    if !verifyPassword(user.PasswordHash, password) {
-        return nil, errors.New("invalid password")
-    }
+// 비밀번호 확인 (실제 앱에서는 적절한 비밀번호 해싱 사용)
+if !verifyPassword(user.PasswordHash, password) {
+return nil, errors.New("invalid password")
+}
 
-    return user, nil
+return user, nil
 }
 
 func (s *UserService) LookupUserByJWT(claims MapClaims) (interface{}, error) {
-    // 클레임에서 사용자 ID 또는 사용자 이름 추출
-    sub, ok := claims["sub"].(string)
-    if !ok {
-        return nil, errors.New("invalid token: missing subject")
-    }
+// 클레임에서 사용자 ID 또는 사용자 이름 추출
+sub, ok := claims["sub"].(string)
+if !ok {
+return nil, errors.New("invalid token: missing subject")
+}
 
-    // 사용자 조회
-    user, exists := s.users[sub]
-    if !exists {
-        return nil, errors.New("user not found")
-    }
+// 사용자 조회
+user, exists := s.users[sub]
+if !exists {
+return nil, errors.New("user not found")
+}
 
-    return user, nil
+return user, nil
 }
 ```
 
@@ -77,19 +77,29 @@ func (s *UserService) LookupUserByJWT(claims MapClaims) (interface{}, error) {
 
 ```go
 authConfig := &middleware.AuthConfig{
-    UserLookup: userService,
-    AuthType:   middleware.AuthTypeJWT,
-    JWTSecret:  "your-secret-key",
-    SkipPaths: []string{
-        "/health",
-        "/metrics",
-        "/public",
-    },
+UserLookup: userService,
+AuthType:   middleware.AuthTypeJWT,
+JWTSecret:  "your-secret-key",
+SkipPaths: []string{
+"/health",
+"/metrics",
+"/public",
+"/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
+"/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
+},
 }
 s.Use(middleware.AuthMiddleware(authConfig))
 ```
 
-이렇게 하면 `/health`, `/metrics`, `/public` 경로에 대한 요청은 인증 검사를 건너뛰게 됩니다.
+이렇게 하면 다음 경로에 대한 요청은 인증 검사를 건너뛰게 됩니다:
+- 정확한 경로 매칭: `/health`, `/metrics`, `/public`
+- 와일드카드 매칭: `/api/users`, `/api/products` 등 `/api`로 시작하는 모든 경로
+- 파라미터 패턴 매칭: `/user/123`, `/user/abc` 등 `/user/:id` 형식의 모든 경로
+
+`SkipPaths`는 다음 세 가지 방식으로 경로를 매칭합니다:
+1. 정확한 경로 매칭: 지정된 경로와 정확히 일치하는 경우
+2. 와일드카드 매칭: `*` 문자를 사용하여 여러 경로를 매칭 (예: `/api/*`)
+3. 파라미터 패턴 매칭: `:` 접두사를 사용하여 경로 세그먼트의 파라미터를 매칭 (예: `/user/:id`)
 
 #### 기본 생성자 함수
 
@@ -150,23 +160,23 @@ userService := NewUserService()
 
 // 기본 인증을 위한 인증 미들웨어 구성
 basicAuthConfig := &middleware.AuthConfig{
-    UserLookup: userService,
-    AuthType:   middleware.AuthTypeBasic,
+UserLookup: userService,
+AuthType:   middleware.AuthTypeBasic,
 
-    // 선택 사항: 사용자 정의 오류 메시지
-    UnauthorizedMessage: "Authentication required",
-    ForbiddenMessage:    "Access denied",
+// 선택 사항: 사용자 정의 오류 메시지
+UnauthorizedMessage: "Authentication required",
+ForbiddenMessage:    "Access denied",
 }
 
 // 또는 JWT 인증을 위한 인증 미들웨어 구성
 jwtAuthConfig := &middleware.AuthConfig{
-    UserLookup: userService,
-    AuthType:   middleware.AuthTypeJWT,
-    JWTSecret:  "your-secret-key",
+UserLookup: userService,
+AuthType:   middleware.AuthTypeJWT,
+JWTSecret:  "your-secret-key",
 
-    // 선택 사항: 사용자 정의 오류 메시지
-    UnauthorizedMessage: "Authentication required",
-    ForbiddenMessage:    "Access denied",
+// 선택 사항: 사용자 정의 오류 메시지
+UnauthorizedMessage: "Authentication required",
+ForbiddenMessage:    "Access denied",
 }
 
 // 라우트 그룹에 미들웨어 추가
@@ -187,26 +197,26 @@ server.GET("/protected-jwt", middleware.AuthMiddleware(jwtAuthConfig), handlePro
 
 ```go
 func handleProtectedRoute(c core.Context) {
-    // 컨텍스트에서 인증된 사용자 가져오기
-    user, ok := middleware.GetUserFromContext(c.Request().Context())
-    if !ok {
-        c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
-        return
-    }
+// 컨텍스트에서 인증된 사용자 가져오기
+user, ok := middleware.GetUserFromContext(c.Request().Context())
+if !ok {
+c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+return
+}
 
-    // 사용자 타입으로 타입 변환
-    u, ok := user.(User)
-    if !ok {
-        c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
-        return
-    }
+// 사용자 타입으로 타입 변환
+u, ok := user.(User)
+if !ok {
+c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+return
+}
 
-    // 사용자 데이터 사용
-    c.JSON(http.StatusOK, map[string]interface{}{
-        "id":       u.ID,
-        "username": u.Username,
-        "role":     u.Role,
-    })
+// 사용자 데이터 사용
+c.JSON(http.StatusOK, map[string]interface{}{
+"id":       u.ID,
+"username": u.Username,
+"role":     u.Role,
+})
 }
 ```
 

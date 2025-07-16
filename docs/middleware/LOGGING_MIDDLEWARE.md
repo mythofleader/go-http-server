@@ -10,22 +10,22 @@
 package main
 
 import (
-    server "github.com/tenqube/tenqube-go-http-server"
+	server "github.com/tenqube/tenqube-go-http-server"
 )
 
 func main() {
-    s, _ := server.NewServer(server.FrameworkGin, "8080")
+	s, _ := server.NewServer(server.FrameworkGin, "8080")
 
-    // 기본 로깅 미들웨어 추가 (콘솔에만 로그 출력)
-    loggingMiddleware := s.GetLoggingMiddleware()
-    s.Use(loggingMiddleware.Middleware(nil))
+	// 기본 로깅 미들웨어 추가 (콘솔에만 로그 출력)
+	loggingMiddleware := s.GetLoggingMiddleware()
+	s.Use(loggingMiddleware.Middleware(nil))
 
-    // 라우트 등록
-    s.GET("/", func(c server.Context) {
-        c.String(200, "Hello, World!")
-    })
+	// 라우트 등록
+	s.GET("/", func(c server.Context) {
+		c.String(200, "Hello, World!")
+	})
 
-    s.Run()
+	s.Run()
 }
 ```
 
@@ -35,11 +35,11 @@ func main() {
 
 ```go
 loggingConfig := &server.LoggingConfig{
-    CustomFields: map[string]string{
-        "environment": "development",
-        "version":     "0.0.1",
-        "app_name":    "my-awesome-app",
-    },
+CustomFields: map[string]string{
+"environment": "development",
+"version":     "0.0.1",
+"app_name":    "my-awesome-app",
+},
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(loggingConfig))
@@ -51,12 +51,12 @@ s.Use(loggingMiddleware.Middleware(loggingConfig))
 
 ```go
 remoteLoggingConfig := &server.LoggingConfig{
-    RemoteURL: "https://your-logging-service.com/api/logs",
-    LoggingToRemote: true,
-    CustomFields: map[string]string{
-        "environment": "production",
-        "version":     "0.0.1",
-    },
+RemoteURL: "https://your-logging-service.com/api/logs",
+LoggingToRemote: true,
+CustomFields: map[string]string{
+"environment": "production",
+"version":     "0.0.1",
+},
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(remoteLoggingConfig))
@@ -70,20 +70,30 @@ s.Use(loggingMiddleware.Middleware(remoteLoggingConfig))
 
 ```go
 loggingConfig := &server.LoggingConfig{
-    SkipPaths: []string{
-        "/health",
-        "/metrics",
-        "/favicon.ico",
-    },
-    CustomFields: map[string]string{
-        "version": "0.0.1",
-    },
+SkipPaths: []string{
+"/health",
+"/metrics",
+"/favicon.ico",
+"/api/*",         // 와일드카드 패턴 - /api로 시작하는 모든 경로
+"/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
+},
+CustomFields: map[string]string{
+"version": "0.0.1",
+},
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(loggingConfig))
 ```
 
-이렇게 하면 `/health`, `/metrics`, `/favicon.ico` 경로에 대한 요청은 로깅되지 않습니다.
+이렇게 하면 다음 경로에 대한 요청은 로깅되지 않습니다:
+- 정확한 경로 매칭: `/health`, `/metrics`, `/favicon.ico`
+- 와일드카드 매칭: `/api/users`, `/api/products` 등 `/api`로 시작하는 모든 경로
+- 파라미터 패턴 매칭: `/user/123`, `/user/abc` 등 `/user/:id` 형식의 모든 경로
+
+`SkipPaths`는 다음 세 가지 방식으로 경로를 매칭합니다:
+1. 정확한 경로 매칭: 지정된 경로와 정확히 일치하는 경우
+2. 와일드카드 매칭: `*` 문자를 사용하여 여러 경로를 매칭 (예: `/api/*`)
+3. 파라미터 패턴 매칭: `:` 접두사를 사용하여 경로 세그먼트의 파라미터를 매칭 (예: `/user/:id`)
 
 ## 콘솔 및 원격 로깅 설정
 
@@ -92,35 +102,35 @@ s.Use(loggingMiddleware.Middleware(loggingConfig))
 ```go
 // 콘솔에만 로그 출력 (기본값)
 consoleOnlyConfig := &server.LoggingConfig{
-    LoggingToConsole: true,
-    LoggingToRemote: false,
-    CustomFields: map[string]string{
-        "version": "0.0.1",
-    },
+LoggingToConsole: true,
+LoggingToRemote: false,
+CustomFields: map[string]string{
+"version": "0.0.1",
+},
 }
 loggingMiddleware := s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(consoleOnlyConfig))
 
 // 원격 URL에만 로그 출력
 remoteOnlyConfig := &server.LoggingConfig{
-    LoggingToConsole: false,
-    LoggingToRemote: true,
-    RemoteURL: "https://your-logging-service.com/api/logs",
-    CustomFields: map[string]string{
-        "version": "0.0.1",
-    },
+LoggingToConsole: false,
+LoggingToRemote: true,
+RemoteURL: "https://your-logging-service.com/api/logs",
+CustomFields: map[string]string{
+"version": "0.0.1",
+},
 }
 loggingMiddleware = s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(remoteOnlyConfig))
 
 // 콘솔과 원격 URL 모두에 로그 출력
 bothConfig := &server.LoggingConfig{
-    LoggingToConsole: true,
-    LoggingToRemote: true,
-    RemoteURL: "https://your-logging-service.com/api/logs",
-    CustomFields: map[string]string{
-        "version": "0.0.1",
-    },
+LoggingToConsole: true,
+LoggingToRemote: true,
+RemoteURL: "https://your-logging-service.com/api/logs",
+CustomFields: map[string]string{
+"version": "0.0.1",
+},
 }
 loggingMiddleware = s.GetLoggingMiddleware()
 s.Use(loggingMiddleware.Middleware(bothConfig))
@@ -164,18 +174,18 @@ s.Use(loggingMiddleware.Middleware(middleware.DefaultLoggingConfig()))
 
 ```go
 type ApiLog struct {
-    ClientIp      string            `json:"client_ip"`
-    Timestamp     string            `json:"timestamp"`
-    Method        string            `json:"method"`
-    Path          string            `json:"path"`
-    Protocol      string            `json:"protocol"`
-    StatusCode    int               `json:"status_code"`
-    Latency       int64             `json:"latency"`
-    UserAgent     string            `json:"user_agent"`
-    Error         string            `json:"error"`
-    RequestId     string            `json:"request_id"`
-    Authorization string            `json:"authorization"`
-    CustomFields  map[string]string `json:"custom_fields,omitempty"`
+ClientIp      string            `json:"client_ip"`
+Timestamp     string            `json:"timestamp"`
+Method        string            `json:"method"`
+Path          string            `json:"path"`
+Protocol      string            `json:"protocol"`
+StatusCode    int               `json:"status_code"`
+Latency       int64             `json:"latency"`
+UserAgent     string            `json:"user_agent"`
+Error         string            `json:"error"`
+RequestId     string            `json:"request_id"`
+Authorization string            `json:"authorization"`
+CustomFields  map[string]string `json:"custom_fields,omitempty"`
 }
 ```
 

@@ -175,6 +175,12 @@ func main() {
 		JWTLookup: jwtService, // Only implement JWTUserLookup
 		AuthType:  server.AuthTypeJWT,
 		JWTSecret: "your-secret-key",
+		// Skip authentication for specific paths
+		SkipPaths: []string{
+			"/public",                // Exact path match
+			"/api/docs/*",            // Wildcard pattern - matches all paths starting with /api/docs/
+			"/api/users/:id/profile", // Parameter pattern - matches paths like /api/users/123/profile
+		},
 	}
 
 	// Alternatively, you could use the specific BasicAuthUserLookup interface
@@ -220,9 +226,58 @@ func main() {
 		})
 	})
 
+	// Add public routes to demonstrate SkipPaths functionality
+
+	// Public route (exact path match in SkipPaths)
+	srv.GET("/public", func(c server.Context) {
+		c.String(http.StatusOK, "This is a public route (exact path match in SkipPaths)")
+	})
+
+	// API docs routes (wildcard pattern in SkipPaths)
+	srv.GET("/api/docs/overview", func(c server.Context) {
+		c.String(http.StatusOK, "API Documentation Overview - No authentication required (wildcard pattern in SkipPaths)")
+	})
+
+	srv.GET("/api/docs/endpoints", func(c server.Context) {
+		c.String(http.StatusOK, "API Endpoints Documentation - No authentication required (wildcard pattern in SkipPaths)")
+	})
+
+	// User profile routes (parameter pattern in SkipPaths)
+	srv.GET("/api/users/123/profile", func(c server.Context) {
+		c.String(http.StatusOK, "Public profile for user 123 - No authentication required (parameter pattern in SkipPaths)")
+	})
+
+	srv.GET("/api/users/456/profile", func(c server.Context) {
+		c.String(http.StatusOK, "Public profile for user 456 - No authentication required (parameter pattern in SkipPaths)")
+	})
+
 	// Add a public route
 	srv.GET("/", func(c server.Context) {
-		c.String(http.StatusOK, "Welcome to the API")
+		// Create a help text that explains the available routes
+		helpText := `
+Auth Middleware Example
+
+This server demonstrates the auth middleware functionality with path matching.
+
+Available endpoints:
+- GET /                       - This help page (public)
+- GET /public                 - Public route (not authenticated - exact path match)
+- GET /api/docs/overview      - API docs overview (not authenticated - wildcard pattern)
+- GET /api/docs/endpoints     - API docs endpoints (not authenticated - wildcard pattern)
+- GET /api/users/123/profile  - User 123 profile (not authenticated - parameter pattern)
+- GET /api/users/456/profile  - User 456 profile (not authenticated - parameter pattern)
+- GET /api/profile            - User profile (authenticated)
+
+The auth middleware is configured to skip authentication for:
+1. Exact path match: "/public"
+2. Wildcard pattern: "/api/docs/*" (all paths starting with /api/docs/)
+3. Parameter pattern: "/api/users/:id/profile" (paths like /api/users/123/profile)
+
+Try accessing the protected route with and without authentication.
+For JWT authentication, use the Authorization header:
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMSJ9.<signature>
+`
+		c.String(http.StatusOK, helpText)
 	})
 
 	// Start the server
