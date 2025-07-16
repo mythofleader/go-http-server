@@ -172,6 +172,12 @@ func (c *Context) Next() {
 	}
 }
 
+// Abort implements core.Context.Abort
+// It prevents pending handlers in the chain from being called.
+func (c *Context) Abort() {
+	c.index = c.handlerCount
+}
+
 // Get implements core.Context.Get
 // It returns the value for the given key and a boolean indicating whether the key exists.
 func (c *Context) Get(key string) (interface{}, bool) {
@@ -457,6 +463,27 @@ func (s *Server) StartLambda() error {
 // handleHTTP creates an http.HandlerFunc that handles the request based on the method and path
 func (s *Server) handleHTTP(method, path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Special handling for OPTIONS requests to support CORS preflight
+		if r.Method == "OPTIONS" {
+			// Run middleware only for OPTIONS requests
+			allHandlers := make([]core.HandlerFunc, len(s.middleware))
+			copy(allHandlers, s.middleware)
+
+			ctx := &Context{
+				req:          r,
+				writer:       w,
+				params:       make(map[string]string),
+				keys:         make(map[string]interface{}),
+				handlers:     allHandlers,
+				index:        -1,
+				handlerCount: len(allHandlers),
+			}
+
+			// Start the middleware chain
+			ctx.Next()
+			return
+		}
+
 		if r.Method != method {
 			// Method not allowed
 			if len(s.noMethodHandlers) > 0 {

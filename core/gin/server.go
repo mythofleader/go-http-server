@@ -120,6 +120,11 @@ func (c *Context) Next() {
 	c.ginContext.Next()
 }
 
+// Abort implements core.Context.Abort
+func (c *Context) Abort() {
+	c.ginContext.Abort()
+}
+
 // Get implements core.Context.Get
 func (c *Context) Get(key string) (interface{}, bool) {
 	value, exists := c.ginContext.Get(key)
