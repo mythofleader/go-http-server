@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the example
-go build -o auth_example
+go build -o auth_example main.go
 
 # Start the server in the background
 ./auth_example &
@@ -22,14 +22,14 @@ curl -v -H "Authorization: Basic $(echo -n 'user1:password' | base64)" http://lo
 kill $SERVER_PID
 
 # Modify the example to use Basic authentication
-sed -i 's/AuthType:   server.AuthTypeJWT/AuthType:   server.AuthTypeBasic/' auth_example.go
-sed -i 's/\/\/ basicAuthConfig/basicAuthConfig/' auth_example.go
-sed -i 's/\/\/     UserLookup/    UserLookup/' auth_example.go
-sed -i 's/\/\/     AuthType/    AuthType/' auth_example.go
-sed -i 's/server.AuthMiddleware(authConfig)/server.AuthMiddleware(basicAuthConfig)/' auth_example.go
+sed -i 's/AuthType:   server.AuthTypeJWT/AuthType:   server.AuthTypeBasic/' main.go
+sed -i 's/\/\/ basicAuthConfig/basicAuthConfig/' main.go
+sed -i 's/\/\/     UserLookup/    UserLookup/' main.go
+sed -i 's/\/\/     AuthType/    AuthType/' main.go
+sed -i 's/server.AuthMiddleware(authConfig)/server.AuthMiddleware(basicAuthConfig)/' main.go
 
 # Build the modified example
-go build -o auth_example_basic
+go build -o auth_example_basic main.go
 
 # Start the server in the background
 ./auth_example_basic &
