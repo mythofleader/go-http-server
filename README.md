@@ -1,4 +1,4 @@
-# mythofleader Go HTTP 서버
+# Go HTTP 서버
 
 Go를 위한 간단하고 추상화된 HTTP 서버 라이브러리로, Gin, 표준 net/http 및 AWS Lambda와 같은 인기 있는 프레임워크를 래핑합니다.
 

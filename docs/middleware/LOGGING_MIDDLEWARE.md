@@ -10,7 +10,7 @@
 package main
 
 import (
-	server "github.com/tenqube/tenqube-go-http-server"
+	server "github.com/mythofleader/go-http-server"
 )
 
 func main() {
@@ -159,7 +159,7 @@ s.Use(loggingMiddleware.Middleware(nil))
 loggingMiddleware := s.GetLoggingMiddleware()
 
 // 기본 구성으로 미들웨어 추가
-s.Use(loggingMiddleware.Middleware(middleware.DefaultLoggingConfig()))
+s.Use(loggingMiddleware.Middleware(server.DefaultLoggingConfig()))
 ```
 
 기본 구성은 다음과 같은 값을 사용합니다:

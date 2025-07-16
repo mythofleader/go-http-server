@@ -11,7 +11,7 @@ package main
 
 import (
     "fmt"
-    server "github.com/tenqube/tenqube-go-http-server"
+    server "github.com/mythofleader/go-http-server"
 )
 
 func main() {
@@ -112,7 +112,7 @@ s.Use(errorHandlerMiddleware.Middleware(nil))
 errorHandlerMiddleware := s.GetErrorHandlerMiddleware()
 
 // 기본 구성으로 미들웨어 추가
-s.Use(errorHandlerMiddleware.Middleware(middleware.DefaultErrorHandlerConfig()))
+s.Use(errorHandlerMiddleware.Middleware(server.DefaultErrorHandlerConfig()))
 ```
 
 기본 구성은 다음과 같은 값을 사용합니다:

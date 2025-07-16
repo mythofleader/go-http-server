@@ -19,11 +19,11 @@
 
 ```go
 type UserLookupInterface interface {
-// LookupUserByBasicAuth looks up a user by username and password
-LookupUserByBasicAuth(username, password string) (interface{}, error)
+    // LookupUserByBasicAuth looks up a user by username and password
+    LookupUserByBasicAuth(username, password string) (interface{}, error)
 
-// LookupUserByJWT looks up a user by JWT claims
-LookupUserByJWT(claims MapClaims) (interface{}, error)
+    // LookupUserByJWT looks up a user by JWT claims
+    LookupUserByJWT(claims MapClaims) (interface{}, error)
 }
 ```
 
@@ -76,9 +76,9 @@ return user, nil
 인증 미들웨어는 특정 경로에 대한 인증 검사를 건너뛸 수 있습니다. `SkipPaths` 필드에 건너뛸 경로 목록을 설정하여 해당 경로에 대한 인증 검사를 비활성화할 수 있습니다:
 
 ```go
-authConfig := &middleware.AuthConfig{
+authConfig := &server.AuthConfig{
 UserLookup: userService,
-AuthType:   middleware.AuthTypeJWT,
+AuthType:   server.AuthTypeJWT,
 JWTSecret:  "your-secret-key",
 SkipPaths: []string{
 "/health",
@@ -88,7 +88,7 @@ SkipPaths: []string{
 "/user/:id",      // 파라미터 패턴 - /user/123, /user/abc 등 모든 사용자 ID 경로
 },
 }
-s.Use(middleware.AuthMiddleware(authConfig))
+s.Use(server.AuthMiddleware(authConfig))
 ```
 
 이렇게 하면 다음 경로에 대한 요청은 인증 검사를 건너뛰게 됩니다:
@@ -159,9 +159,9 @@ s.Use(server.AuthMiddleware(authConfig))
 userService := NewUserService()
 
 // 기본 인증을 위한 인증 미들웨어 구성
-basicAuthConfig := &middleware.AuthConfig{
+basicAuthConfig := &server.AuthConfig{
 UserLookup: userService,
-AuthType:   middleware.AuthTypeBasic,
+AuthType:   server.AuthTypeBasic,
 
 // 선택 사항: 사용자 정의 오류 메시지
 UnauthorizedMessage: "Authentication required",
@@ -169,9 +169,9 @@ ForbiddenMessage:    "Access denied",
 }
 
 // 또는 JWT 인증을 위한 인증 미들웨어 구성
-jwtAuthConfig := &middleware.AuthConfig{
+jwtAuthConfig := &server.AuthConfig{
 UserLookup: userService,
-AuthType:   middleware.AuthTypeJWT,
+AuthType:   server.AuthTypeJWT,
 JWTSecret:  "your-secret-key",
 
 // 선택 사항: 사용자 정의 오류 메시지
@@ -181,14 +181,14 @@ ForbiddenMessage:    "Access denied",
 
 // 라우트 그룹에 미들웨어 추가
 protectedBasic := server.Group("/api/basic")
-protectedBasic.Use(middleware.AuthMiddleware(basicAuthConfig))
+protectedBasic.Use(server.AuthMiddleware(basicAuthConfig))
 
 protectedJWT := server.Group("/api/jwt")
-protectedJWT.Use(middleware.AuthMiddleware(jwtAuthConfig))
+protectedJWT.Use(server.AuthMiddleware(jwtAuthConfig))
 
 // 또는 특정 라우트에 추가
-server.GET("/protected-basic", middleware.AuthMiddleware(basicAuthConfig), handleProtectedRoute)
-server.GET("/protected-jwt", middleware.AuthMiddleware(jwtAuthConfig), handleProtectedRoute)
+server.GET("/protected-basic", server.AuthMiddleware(basicAuthConfig), handleProtectedRoute)
+server.GET("/protected-jwt", server.AuthMiddleware(jwtAuthConfig), handleProtectedRoute)
 ```
 
 ### 3. 인증된 사용자 접근하기
@@ -196,9 +196,9 @@ server.GET("/protected-jwt", middleware.AuthMiddleware(jwtAuthConfig), handlePro
 라우트 핸들러에서 요청 컨텍스트에서 인증된 사용자에 접근할 수 있습니다:
 
 ```go
-func handleProtectedRoute(c core.Context) {
+func handleProtectedRoute(c server.Context) {
 // 컨텍스트에서 인증된 사용자 가져오기
-user, ok := middleware.GetUserFromContext(c.Request().Context())
+user, ok := server.GetUserFromContext(c.Request().Context())
 if !ok {
 c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
 return

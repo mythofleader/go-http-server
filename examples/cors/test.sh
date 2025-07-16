@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the example
-go build -o cors_example
+go build -o cors_example main.go
 
 # Start the server in the background
 ./cors_example &
@@ -31,12 +31,12 @@ kill $SERVER_PID
 
 # Now modify the example to use specific allowed domains
 echo -e "\n\nModifying the example to use specific allowed domains..."
-sed -i 's/\/\/ AllowedDomains: \[\]string{/AllowedDomains: []string{/' cors_example.go
-sed -i 's/\/\/     "http:\/\/localhost:3000",/    "http:\/\/localhost:3000",/' cors_example.go
-sed -i 's/\/\/     "https:\/\/example.com",/    "https:\/\/example.com",/' cors_example.go
+sed -i 's/\/\/ AllowedDomains: \[\]string{/AllowedDomains: []string{/' main.go
+sed -i 's/\/\/     "http:\/\/localhost:3000",/    "http:\/\/localhost:3000",/' main.go
+sed -i 's/\/\/     "https:\/\/example.com",/    "https:\/\/example.com",/' main.go
 
 # Build the modified example
-go build -o cors_example_restricted
+go build -o cors_example_restricted main.go
 
 # Start the server in the background
 ./cors_example_restricted &
