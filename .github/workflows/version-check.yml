@@ -46,16 +46,12 @@ jobs:
           fi
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
 
-          IFS='.' read -r -a PR_PARTS <<< "$PR_VERSION"
-          IFS='.' read -r -a MAIN_PARTS <<< "$MAIN_VERSION"
-
-          if [[ ${PR_PARTS[0]} -gt ${MAIN_PARTS[0]} ]]; then exit 0; fi
-          if [[ ${PR_PARTS[0]} -lt ${MAIN_PARTS[0]} ]]; then exit 1; fi
-          if [[ ${PR_PARTS[1]} -gt ${MAIN_PARTS[1]} ]]; then exit 0; fi
-          if [[ ${PR_PARTS[1]} -lt ${MAIN_PARTS[1]} ]]; then exit 1; fi
-          if [[ ${PR_PARTS[2]} -gt ${MAIN_PARTS[2]} ]]; then exit 0; fi
-          if [[ ${PR_PARTS[2]} -lt ${MAIN_PARTS[2]} ]]; then exit 1; fi
-          echo "Error: PR version is the same as the main branch version."
+          cmp=$(printf "%s\n%s\n" "$PR_VERSION" "$MAIN_VERSION" | sort -V | tail -n1)
+          if [ "$cmp" = "$PR_VERSION" ] && [ "$PR_VERSION" != "$MAIN_VERSION" ]; then
+            echo "PR version($PR_VERSION) is newer than main version($MAIN_VERSION)."
+            exit 0
+          fi
+          echo "Error: PR version is not newer than main branch version."
           exit 1
 
       - name: Validate semantic versioning
