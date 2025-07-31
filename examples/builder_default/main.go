@@ -106,7 +106,7 @@ func main() {
 	)
 
 	// Enable default middleware
-	builder.WithDefaultLogging()       // Enable default logging middleware
+	builder.WithDefaultLogging(true)   // Enable default logging middleware with console logging enabled
 	builder.WithDefaultTimeout()       // Enable default timeout middleware
 	builder.WithDefaultCORS()          // Enable default CORS middleware
 	builder.WithDefaultErrorHandling() // Enable default error handler middleware

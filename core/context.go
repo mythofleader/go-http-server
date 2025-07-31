@@ -163,6 +163,8 @@ type Server interface {
 	NoMethod(handlers ...HandlerFunc)
 	// Run starts the server
 	Run() error
+	// Stop stops the server immediately
+	Stop() error
 	// RunTLS starts the server with TLS
 	RunTLS(addr, certFile, keyFile string) error
 	// Shutdown gracefully shuts down the server

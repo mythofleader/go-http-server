@@ -498,8 +498,13 @@ go func() {
 // 서버 빌더 생성 (방법 1: 프레임워크와 포트 지정)
 builder := server.NewServerBuilder(server.FrameworkGin, "8080")
 
-// 또는 Gin 프레임워크와 8080 포트를 사용하는 서버 빌더 생성 (방법 2: 더 간단한 방법)
+// 또는 포트를 나중에 설정하는 방법 (자동으로 8000-9000 사이의 사용 가능한 포트 할당)
+// builder := server.NewServerBuilder(server.FrameworkGin)
+// builder.WithDefaultPort()
+
+// 또는 Gin 프레임워크를 사용하는 서버 빌더 생성 (방법 3: 더 간단한 방법)
 // builder := server.NewGinServerBuilder()
+// builder.WithDefaultPort() // 자동으로 8000-9000 사이의 사용 가능한 포트 할당
 
 // 컨트롤러 추가
 userController := &UserController{userService: myUserService}
@@ -550,12 +555,13 @@ if err := s.Run(); err != nil {
 
 1. 컨트롤러 추가: `AddController`, `AddControllers`
 2. 미들웨어 추가: `AddMiddleware`, `AddMiddlewares`
-3. 로깅 구성: `WithLogging`, `WithRemoteLogging`
-4. 타임아웃 구성: `WithTimeout`
-5. CORS 구성: `WithCORS`
-6. 에러 핸들러 구성: `WithErrorHandler`
-7. 기본 미들웨어 활성화:
-   - `WithDefaultLogging`: 기본 로깅 미들웨어 활성화
+3. 포트 구성: `WithDefaultPort`: 8000-9000 사이의 사용 가능한 포트를 자동으로 할당 (NewServerBuilder에서 포트를 지정하지 않은 경우 필수)
+4. 로깅 구성: `WithLogging`, `WithRemoteLogging`
+5. 타임아웃 구성: `WithTimeout`
+6. CORS 구성: `WithCORS`
+7. 에러 핸들러 구성: `WithErrorHandler`
+8. 기본 미들웨어 활성화:
+   - `WithDefaultLogging(console ...bool)`: 기본 로깅 미들웨어 활성화 (console 파라미터로 콘솔 로깅 활성화/비활성화 가능, 파라미터가 없으면 기본값은 true)
    - `WithDefaultTimeout`: 기본 타임아웃 미들웨어 활성화
    - `WithDefaultCORS`: 기본 CORS 미들웨어 활성화
    - `WithDefaultErrorHandling`: 기본 에러 핸들러 미들웨어 활성화

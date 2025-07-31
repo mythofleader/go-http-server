@@ -55,7 +55,7 @@ func main() {
 	builder1.AddController(&UserController{})
 
 	// Enable default middleware
-	builder1.WithDefaultLogging()
+	builder1.WithDefaultLogging(true) // Enable console logging
 	builder1.WithDefaultErrorHandling()
 
 	// Default NoRoute and NoMethod handlers are now applied automatically
@@ -80,7 +80,7 @@ func main() {
 	builder2.AddController(&UserController{})
 
 	// Enable default middleware
-	builder2.WithDefaultLogging()
+	builder2.WithDefaultLogging(true) // Enable console logging
 	builder2.WithDefaultErrorHandling()
 
 	// Set custom NoRoute handler

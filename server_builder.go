@@ -3,6 +3,12 @@
 package server
 
 import (
+	"fmt"
+	"math/rand"
+	"net"
+	"strconv"
+	"time"
+
 	"github.com/mythofleader/go-http-server/core"
 )
 
@@ -10,6 +16,7 @@ import (
 type ServerBuilder struct {
 	frameworkType    core.FrameworkType
 	port             string
+	portSet          bool // Flag to track whether a port has been set
 	controllers      []core.Controller
 	middleware       []core.HandlerFunc
 	loggingConfig    *core.LoggingConfig
@@ -26,22 +33,78 @@ type ServerBuilder struct {
 	useDefaultErrorHandler bool
 }
 
-// NewServerBuilder creates a new ServerBuilder with the specified framework type and port.
-func NewServerBuilder(frameworkType core.FrameworkType, port string) *ServerBuilder {
-	return &ServerBuilder{
+// NewServerBuilder creates a new ServerBuilder with the specified framework type and optional port.
+// If port is provided, it will be used; otherwise, you must call WithDefaultPort before Build.
+func NewServerBuilder(frameworkType core.FrameworkType, port ...string) *ServerBuilder {
+	builder := &ServerBuilder{
 		frameworkType:    frameworkType,
-		port:             port,
 		controllers:      make([]core.Controller, 0),
 		middleware:       make([]core.HandlerFunc, 0),
 		noRouteHandlers:  make([]core.HandlerFunc, 0),
 		noMethodHandlers: make([]core.HandlerFunc, 0),
 	}
+
+	// If port is provided, set it
+	if len(port) > 0 && port[0] != "" {
+		builder.port = port[0]
+		builder.portSet = true
+	}
+
+	return builder
 }
 
-// NewGinServerBuilder creates a new ServerBuilder with the Gin framework and port 8080.
+// NewGinServerBuilder creates a new ServerBuilder with the Gin framework.
 // This is a convenience function that doesn't require any arguments.
+// The port must be set using WithDefaultPort before calling Build.
 func NewGinServerBuilder() *ServerBuilder {
-	return NewServerBuilder(core.FrameworkGin, "8080")
+	return NewServerBuilder(core.FrameworkGin)
+}
+
+// isPortAvailable checks if a port is available by attempting to listen on it.
+// It returns true if the port is available, false otherwise.
+func isPortAvailable(port int) bool {
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+	if err != nil {
+		return false
+	}
+	ln.Close()
+	return true
+}
+
+// findAvailablePort finds an available port in the range 8000-9000.
+// It returns the first available port it finds, or 8080 if no ports are available.
+func findAvailablePort() string {
+	// Create a new random source and generator instead of using the deprecated rand.Seed
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+
+	// Create a shuffled slice of ports between 8000 and 9000
+	ports := make([]int, 1001)
+	for i := 0; i <= 1000; i++ {
+		ports[i] = 8000 + i
+	}
+	rng.Shuffle(len(ports), func(i, j int) {
+		ports[i], ports[j] = ports[j], ports[i]
+	})
+
+	// Try each port in the shuffled order
+	for _, port := range ports {
+		if isPortAvailable(port) {
+			return strconv.Itoa(port)
+		}
+	}
+
+	// If no ports are available, return a default port
+	return "8080"
+}
+
+// WithDefaultPort sets a default port for the server.
+// This method automatically finds an available port between 8000 and 9000.
+// This method must be called if no port was provided in NewServerBuilder.
+func (b *ServerBuilder) WithDefaultPort() *ServerBuilder {
+	b.port = findAvailablePort()
+	b.portSet = true
+	return b
 }
 
 // AddController adds a controller to the builder.
@@ -111,8 +174,27 @@ func (b *ServerBuilder) WithErrorHandler(errorConfig core.ErrorHandlerConfig) *S
 }
 
 // WithDefaultLogging enables the default logging middleware.
-func (b *ServerBuilder) WithDefaultLogging() *ServerBuilder {
+// If console is not provided or is true, logs will be written to the console.
+// If console is provided and is false, logs will not be written to the console.
+// This function accepts an optional boolean parameter for backward compatibility.
+func (b *ServerBuilder) WithDefaultLogging(console ...bool) *ServerBuilder {
 	b.useDefaultLogging = true
+
+	// Default to true if no value is provided
+	consoleLogging := true
+
+	// If a value is provided, use that value
+	if len(console) > 0 {
+		consoleLogging = console[0]
+	}
+
+	b.loggingConfig = &core.LoggingConfig{
+		RemoteURL:        "",
+		CustomFields:     make(map[string]string),
+		LoggingToConsole: consoleLogging,
+		LoggingToRemote:  false,
+		SkipPaths:        []string{},
+	}
 	return b
 }
 
@@ -148,6 +230,11 @@ func (b *ServerBuilder) WithNoMethod(handlers ...core.HandlerFunc) *ServerBuilde
 
 // Build creates a server with the configured controllers and middleware.
 func (b *ServerBuilder) Build() (core.Server, error) {
+	// Check if a port has been set
+	if !b.portSet {
+		return nil, fmt.Errorf("port not set: use NewServerBuilder with a port parameter or call WithDefaultPort")
+	}
+
 	// Create a new server
 	server, err := NewServer(b.frameworkType, b.port)
 	if err != nil {
@@ -229,7 +316,7 @@ func (b *ServerBuilder) Build() (core.Server, error) {
 		loggingConfig := &core.LoggingConfig{
 			RemoteURL:        "",
 			CustomFields:     make(map[string]string),
-			LoggingToConsole: true,
+			LoggingToConsole: true, // Default to true for backward compatibility
 			LoggingToRemote:  false,
 			SkipPaths:        skipLogPaths,
 		}

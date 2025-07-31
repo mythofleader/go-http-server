@@ -2,4 +2,4 @@
 package server
 
 // Version is the current version of the go-http-server.
-const Version = "0.0.41"
+const Version = "0.0.5"

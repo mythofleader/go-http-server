@@ -348,6 +348,14 @@ func (s *Server) RunTLS(addr, certFile, keyFile string) error {
 	return s.server.ListenAndServeTLS(certFile, keyFile)
 }
 
+// Stop implements core.Server.Stop
+func (s *Server) Stop() error {
+	if s.server == nil {
+		return nil
+	}
+	return s.server.Close()
+}
+
 // Shutdown implements core.Server.Shutdown
 func (s *Server) Shutdown(ctx context.Context) error {
 	if s.server == nil {
