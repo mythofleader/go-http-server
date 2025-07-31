@@ -19,7 +19,7 @@ func main() {
 	// Scenario 2: Creating a server builder without a port parameter and then calling WithDefaultPort
 	fmt.Println("\n=== Scenario 2: Creating a server builder without a port parameter and then calling WithDefaultPort ===")
 	builder2 := server.NewServerBuilder(server.FrameworkGin)
-	builder2.WithDefaultPort("8082")
+	builder2.WithDefaultPort()
 	testBuilder(builder2, "Builder without port parameter but with WithDefaultPort")
 
 	// Scenario 3: Creating a server builder without a port parameter and not calling WithDefaultPort
@@ -30,22 +30,22 @@ func main() {
 
 func testBuilder(builder *server.ServerBuilder, description string) {
 	fmt.Printf("Testing %s...\n", description)
-	
+
 	// Try to build the server
 	srv, err := builder.Build()
-	
+
 	if err != nil {
 		fmt.Printf("Error building server: %v\n", err)
 		fmt.Printf("Result: %s test PASSED (expected error)\n", description)
 	} else {
 		// If we got a server, make sure we can stop it
 		fmt.Printf("Successfully built server\n")
-		
+
 		// Stop the server to clean up
 		if err := srv.Stop(); err != nil {
 			log.Fatalf("Failed to stop server: %v", err)
 		}
-		
+
 		fmt.Printf("Result: %s test PASSED (expected success)\n", description)
 	}
 }
