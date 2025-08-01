@@ -177,6 +177,9 @@ type Server interface {
 	// This method should be called instead of Run or RunTLS when running in AWS Lambda.
 	// It returns an error if the framework does not support Lambda.
 	StartLambda() error
+	// GetPort returns the port the server is configured to run on.
+	// This is useful when using random ports.
+	GetPort() string
 }
 
 // RouterGroup is a group of routes.

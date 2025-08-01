@@ -192,7 +192,9 @@ var (
 // NewServer creates a new Server instance.
 // By default, it uses the Gin framework if no framework type is specified.
 // If port is not provided, it defaults to "8080".
-func NewServer(frameworkType core.FrameworkType, port string) (core.Server, error) {
+// If showFrameworkLogs is true, logs about the framework, middleware, and routes will be printed to the console.
+// If showFrameworkLogs is false, these logs will be suppressed.
+func NewServer(frameworkType core.FrameworkType, port string, showFrameworkLogs bool) (core.Server, error) {
 	// Default port to "8080" if not provided
 	if port == "" {
 		port = "8080"
@@ -201,9 +203,9 @@ func NewServer(frameworkType core.FrameworkType, port string) (core.Server, erro
 	// Use the specified framework
 	switch frameworkType {
 	case core.FrameworkGin:
-		return gin.NewServer(port), nil
+		return gin.NewServer(port, showFrameworkLogs), nil
 	case core.FrameworkStdHTTP:
-		return std.NewServer(port), nil
+		return std.NewServer(port, showFrameworkLogs), nil
 	default:
 		return nil, fmt.Errorf("unsupported framework type: %s", frameworkType)
 	}
