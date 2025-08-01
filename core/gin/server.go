@@ -142,6 +142,7 @@ type Server struct {
 	server      *http.Server
 	port        string
 	middlewares []string // Track middleware names
+	showLogs    bool     // Controls whether framework logs are shown
 }
 
 // GetLoggingMiddleware returns a Gin-specific logging middleware.
@@ -219,8 +220,10 @@ func (s *Server) Use(middleware ...core.HandlerFunc) {
 		middlewareName := runtime.FuncForPC(funcValue.Pointer()).Name()
 		s.middlewares = append(s.middlewares, middlewareName)
 
-		// Log middleware addition
-		log.Printf("[GIN] Adding middleware: %s", middlewareName)
+		// Log middleware addition if showLogs is true
+		if s.showLogs {
+			log.Printf("[GIN] Adding middleware: %s", middlewareName)
+		}
 
 		s.engine.Use(wrapHandler(m))
 	}
@@ -248,9 +251,11 @@ func (s *Server) RegisterRouter(controllers ...core.Controller) {
 			s.PATCH(path, handlers...)
 		}
 
-		// Log controller registration
-		log.Printf("[GIN] Registered controller with method: %s, path: %s, skip logging: %t, skip auth check: %t",
-			method, path, controller.SkipLogging(), controller.SkipAuthCheck())
+		// Log controller registration if showLogs is true
+		if s.showLogs {
+			log.Printf("[GIN] Registered controller with method: %s, path: %s, skip logging: %t, skip auth check: %t",
+				method, path, controller.SkipLogging(), controller.SkipAuthCheck())
+		}
 	}
 }
 
@@ -266,7 +271,9 @@ func (s *Server) NoRoute(handlers ...core.HandlerFunc) {
 				_ = c.Error(errors.NewNotFoundHttpError(err))
 			},
 		}
-		log.Printf("[GIN] Using default NoRoute handler")
+		if s.showLogs {
+			log.Printf("[GIN] Using default NoRoute handler")
+		}
 	}
 
 	ginHandlers := make([]gin.HandlerFunc, len(handlers))
@@ -274,7 +281,9 @@ func (s *Server) NoRoute(handlers ...core.HandlerFunc) {
 		ginHandlers[i] = wrapHandler(handler)
 	}
 	s.engine.NoRoute(ginHandlers...)
-	log.Printf("[GIN] Registered NoRoute handler")
+	if s.showLogs {
+		log.Printf("[GIN] Registered NoRoute handler")
+	}
 }
 
 // NoMethod implements core.Server.NoMethod
@@ -290,7 +299,9 @@ func (s *Server) NoMethod(handlers ...core.HandlerFunc) {
 				_ = c.Error(errors.NewMethodNotAllowedHttpError(err))
 			},
 		}
-		log.Printf("[GIN] Using default NoMethod handler")
+		if s.showLogs {
+			log.Printf("[GIN] Using default NoMethod handler")
+		}
 	}
 
 	ginHandlers := make([]gin.HandlerFunc, len(handlers))
@@ -298,25 +309,29 @@ func (s *Server) NoMethod(handlers ...core.HandlerFunc) {
 		ginHandlers[i] = wrapHandler(handler)
 	}
 	s.engine.NoMethod(ginHandlers...)
-	log.Printf("[GIN] Registered NoMethod handler")
+	if s.showLogs {
+		log.Printf("[GIN] Registered NoMethod handler")
+	}
 }
 
 // Run implements core.Server.Run
 func (s *Server) Run() error {
 	addr := ":" + s.port
 
-	// Log server information
-	log.Printf("[GIN] Server starting on %s", addr)
-	log.Printf("[GIN] Using Gin framework version: %s", gin.Version)
+	// Log server information if showLogs is true
+	if s.showLogs {
+		log.Printf("[GIN] Server starting on %s", addr)
+		log.Printf("[GIN] Using Gin framework version: %s", gin.Version)
 
-	// Log middleware information
-	if len(s.middlewares) > 0 {
-		log.Println("[GIN] Middleware registered:")
-		for i, middleware := range s.middlewares {
-			log.Printf("[GIN]   %d. %s", i+1, middleware)
+		// Log middleware information
+		if len(s.middlewares) > 0 {
+			log.Println("[GIN] Middleware registered:")
+			for i, middleware := range s.middlewares {
+				log.Printf("[GIN]   %d. %s", i+1, middleware)
+			}
+		} else {
+			log.Println("[GIN] No middleware registered")
 		}
-	} else {
-		log.Println("[GIN] No middleware registered")
 	}
 
 	s.server = &http.Server{
@@ -324,18 +339,21 @@ func (s *Server) Run() error {
 		Handler: s.engine,
 	}
 
-	// Log routes information
-	routes := s.engine.Routes()
-	if len(routes) > 0 {
-		log.Println("[GIN] Routes registered:")
-		for i, route := range routes {
-			log.Printf("[GIN]   %d. %s %s", i+1, route.Method, route.Path)
+	// Log routes information if showLogs is true
+	if s.showLogs {
+		routes := s.engine.Routes()
+		if len(routes) > 0 {
+			log.Println("[GIN] Routes registered:")
+			for i, route := range routes {
+				log.Printf("[GIN]   %d. %s %s", i+1, route.Method, route.Path)
+			}
+		} else {
+			log.Println("[GIN] No routes registered")
 		}
-	} else {
-		log.Println("[GIN] No routes registered")
+
+		log.Printf("[GIN] Server is ready to handle requests")
 	}
 
-	log.Printf("[GIN] Server is ready to handle requests")
 	return s.engine.Run(addr)
 }
 
@@ -362,6 +380,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 		return nil
 	}
 	return s.server.Shutdown(ctx)
+}
+
+// GetPort implements core.Server.GetPort
+func (s *Server) GetPort() string {
+	return s.port
 }
 
 // StartLambda starts the server in AWS Lambda mode.
@@ -490,12 +513,20 @@ func wrapHandler(handler core.HandlerFunc) gin.HandlerFunc {
 }
 
 // NewServer creates a new Server instance using the Gin framework.
-func NewServer(port string) *Server {
+// If showLogs is true, logs about the framework, middleware, and routes will be printed to the console.
+// If showLogs is false, these logs will be suppressed.
+func NewServer(port string, showLogs bool) *Server {
 	gin.SetMode(gin.ReleaseMode)
-	log.Printf("[GIN] Creating new Gin server on port %s", port)
+
+	// Only log if showLogs is true
+	if showLogs {
+		log.Printf("[GIN] Creating new Gin server on port %s", port)
+	}
+
 	return &Server{
 		engine:      gin.New(),
 		port:        port,
 		middlewares: make([]string, 0),
+		showLogs:    showLogs,
 	}
 }

@@ -424,6 +424,42 @@ go func() {
 }()
 ```
 
+### 포트 가져오기
+
+서버가 사용 중인 포트를 가져오려면 `GetPort()` 메서드를 사용합니다. 이 메서드는 특히 `WithDefaultRandomPort()`를 사용하여 랜덤 포트를 할당한 경우에 유용합니다.
+
+```go
+// 서버 생성
+s, err := server.NewServer(server.FrameworkGin, "8080")
+if err != nil {
+	log.Fatalf("서버 생성 실패: %v", err)
+}
+
+// 포트 가져오기
+port := s.GetPort()
+fmt.Printf("서버가 %s 포트에서 실행 중입니다\n", port)
+```
+
+서버 빌더를 사용하는 경우:
+
+```go
+// 서버 빌더 생성
+builder := server.NewServerBuilder(server.FrameworkGin)
+
+// 랜덤 포트 할당
+builder.WithDefaultRandomPort()
+
+// 서버 빌드
+s, err := builder.Build()
+if err != nil {
+	log.Fatalf("서버 빌드 실패: %v", err)
+}
+
+// 할당된 포트 가져오기
+port := s.GetPort()
+fmt.Printf("서버가 %s 포트에서 실행 중입니다\n", port)
+```
+
 ## 명령줄 예제
 
 라이브러리에는 명령줄 플래그를 사용하여 프레임워크를 선택하고 Lambda 모드를 활성화하는 방법을 보여주는 예제가 포함되어 있습니다:
@@ -491,13 +527,17 @@ func main() {
 // 서버 빌더 생성 (방법 1: 프레임워크와 포트 지정)
 builder := server.NewServerBuilder(server.FrameworkGin, "8080")
 
-// 또는 포트를 나중에 설정하는 방법 (자동으로 8000-9000 사이의 사용 가능한 포트 할당)
+// 또는 포트를 나중에 설정하는 방법
 // builder := server.NewServerBuilder(server.FrameworkGin)
-// builder.WithDefaultPort()
+// builder.WithDefaultPort() // 기본 포트 8080 설정
+// 또는
+// builder.WithDefaultRandomPort() // 자동으로 8000-9000 사이의 사용 가능한 포트 할당
 
 // 또는 Gin 프레임워크를 사용하는 서버 빌더 생성 (방법 3: 더 간단한 방법)
 // builder := server.NewGinServerBuilder()
-// builder.WithDefaultPort() // 자동으로 8000-9000 사이의 사용 가능한 포트 할당
+// builder.WithDefaultPort() // 기본 포트 8080 설정
+// 또는
+// builder.WithDefaultRandomPort() // 자동으로 8000-9000 사이의 사용 가능한 포트 할당
 
 // 컨트롤러 추가
 userController := &UserController{userService: myUserService}
@@ -549,7 +589,9 @@ if err := s.Run(); err != nil {
 
 1. 컨트롤러 추가: `AddController`, `AddControllers`
 2. 미들웨어 추가: `AddMiddleware`, `AddMiddlewares`
-3. 포트 구성: `WithDefaultPort`: 8000-9000 사이의 사용 가능한 포트를 자동으로 할당 (NewServerBuilder에서 포트를 지정하지 않은 경우 필수)
+3. 포트 구성:
+   - `WithDefaultPort`: 기본 포트 8080으로 설정 (NewServerBuilder에서 포트를 지정하지 않은 경우 필수)
+   - `WithDefaultRandomPort`: 8000-9000 사이의 사용 가능한 포트를 자동으로 할당 (NewServerBuilder에서 포트를 지정하지 않은 경우 필수)
 4. 로깅 구성: `WithLogging`, `WithRemoteLogging`
 5. 타임아웃 구성: `WithTimeout`
 6. CORS 구성: `WithCORS`

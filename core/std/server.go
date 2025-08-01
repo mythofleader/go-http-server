@@ -213,6 +213,7 @@ type Server struct {
 	middlewareLog    []string           // Track middleware names for logging
 	noRouteHandlers  []core.HandlerFunc // Handlers for 404 Not Found errors
 	noMethodHandlers []core.HandlerFunc // Handlers for 405 Method Not Allowed errors
+	showLogs         bool               // Controls whether framework logs are shown
 }
 
 // GetLoggingMiddleware returns a standard HTTP-specific logging middleware.
@@ -301,8 +302,10 @@ func (s *Server) Use(middleware ...core.HandlerFunc) {
 		middlewareName := runtime.FuncForPC(funcValue.Pointer()).Name()
 		s.middlewareLog = append(s.middlewareLog, middlewareName)
 
-		// Log middleware addition
-		log.Printf("[STD] Adding middleware: %s", middlewareName)
+		// Log middleware addition if showLogs is true
+		if s.showLogs {
+			log.Printf("[STD] Adding middleware: %s", middlewareName)
+		}
 	}
 
 	s.middleware = append(s.middleware, middleware...)
@@ -330,9 +333,11 @@ func (s *Server) RegisterRouter(controllers ...core.Controller) {
 			s.PATCH(path, handlers...)
 		}
 
-		// Log controller registration
-		log.Printf("[STD] Registered controller with method: %s, path: %s, skip logging: %t, skip auth check: %t",
-			method, path, controller.SkipLogging(), controller.SkipAuthCheck())
+		// Log controller registration if showLogs is true
+		if s.showLogs {
+			log.Printf("[STD] Registered controller with method: %s, path: %s, skip logging: %t, skip auth check: %t",
+				method, path, controller.SkipLogging(), controller.SkipAuthCheck())
+		}
 	}
 }
 
@@ -348,11 +353,15 @@ func (s *Server) NoRoute(handlers ...core.HandlerFunc) {
 				_ = c.Error(httperrors.NewNotFoundHttpError(err))
 			},
 		}
-		log.Printf("[STD] Using default NoRoute handler")
+		if s.showLogs {
+			log.Printf("[STD] Using default NoRoute handler")
+		}
 	}
 
 	s.noRouteHandlers = handlers
-	log.Printf("[STD] Registered NoRoute handler")
+	if s.showLogs {
+		log.Printf("[STD] Registered NoRoute handler")
+	}
 }
 
 // NoMethod implements core.Server.NoMethod
@@ -368,48 +377,56 @@ func (s *Server) NoMethod(handlers ...core.HandlerFunc) {
 				_ = c.Error(httperrors.NewMethodNotAllowedHttpError(err))
 			},
 		}
-		log.Printf("[STD] Using default NoMethod handler")
+		if s.showLogs {
+			log.Printf("[STD] Using default NoMethod handler")
+		}
 	}
 
 	s.noMethodHandlers = handlers
-	log.Printf("[STD] Registered NoMethod handler")
+	if s.showLogs {
+		log.Printf("[STD] Registered NoMethod handler")
+	}
 }
 
 // Run implements core.Server.Run for Server
 func (s *Server) Run() error {
 	addr := ":" + s.port
 
-	// Log server information
-	log.Printf("[STD] Server starting on %s", addr)
-	log.Printf("[STD] Using standard net/http package")
+	// Log server information if showLogs is true
+	if s.showLogs {
+		log.Printf("[STD] Server starting on %s", addr)
+		log.Printf("[STD] Using standard net/http package")
 
-	// Log middleware information
-	if len(s.middlewareLog) > 0 {
-		log.Println("[STD] Middleware registered:")
-		for i, middleware := range s.middlewareLog {
-			log.Printf("[STD]   %d. %s", i+1, middleware)
-		}
-	} else {
-		log.Println("[STD] No middleware registered")
-	}
-
-	// Log routes information
-	routeCount := 0
-	for _, paths := range s.routes {
-		routeCount += len(paths)
-	}
-
-	if routeCount > 0 {
-		log.Println("[STD] Routes registered:")
-		routeIndex := 1
-		for method, paths := range s.routes {
-			for path := range paths {
-				log.Printf("[STD]   %d. %s %s", routeIndex, method, path)
-				routeIndex++
+		// Log middleware information
+		if len(s.middlewareLog) > 0 {
+			log.Println("[STD] Middleware registered:")
+			for i, middleware := range s.middlewareLog {
+				log.Printf("[STD]   %d. %s", i+1, middleware)
 			}
+		} else {
+			log.Println("[STD] No middleware registered")
 		}
-	} else {
-		log.Println("[STD] No routes registered")
+
+		// Log routes information
+		routeCount := 0
+		for _, paths := range s.routes {
+			routeCount += len(paths)
+		}
+
+		if routeCount > 0 {
+			log.Println("[STD] Routes registered:")
+			routeIndex := 1
+			for method, paths := range s.routes {
+				for path := range paths {
+					log.Printf("[STD]   %d. %s %s", routeIndex, method, path)
+					routeIndex++
+				}
+			}
+		} else {
+			log.Println("[STD] No routes registered")
+		}
+
+		log.Printf("[STD] Server is ready to handle requests")
 	}
 
 	s.server = &http.Server{
@@ -417,7 +434,6 @@ func (s *Server) Run() error {
 		Handler: s.mux,
 	}
 
-	log.Printf("[STD] Server is ready to handle requests")
 	return s.server.ListenAndServe()
 }
 
@@ -444,6 +460,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 		return nil
 	}
 	return s.server.Shutdown(ctx)
+}
+
+// GetPort implements core.Server.GetPort for Server
+func (s *Server) GetPort() string {
+	return s.port
 }
 
 // StartLambda starts the server in AWS Lambda mode.
@@ -691,13 +712,20 @@ func (g *RouterGroup) wrapHandler(handler core.HandlerFunc) core.HandlerFunc {
 }
 
 // NewServer creates a new Server instance using the standard HTTP package.
-func NewServer(port string) *Server {
-	log.Printf("[STD] Creating new standard HTTP server on port %s", port)
+// If showLogs is true, logs about the framework, middleware, and routes will be printed to the console.
+// If showLogs is false, these logs will be suppressed.
+func NewServer(port string, showLogs bool) *Server {
+	// Only log if showLogs is true
+	if showLogs {
+		log.Printf("[STD] Creating new standard HTTP server on port %s", port)
+	}
+
 	return &Server{
 		mux:              http.NewServeMux(),
 		port:             port,
 		middlewareLog:    make([]string, 0),
 		noRouteHandlers:  make([]core.HandlerFunc, 0),
 		noMethodHandlers: make([]core.HandlerFunc, 0),
+		showLogs:         showLogs,
 	}
 }

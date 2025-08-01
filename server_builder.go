@@ -31,17 +31,19 @@ type ServerBuilder struct {
 	useDefaultTimeout      bool
 	useDefaultCORS         bool
 	useDefaultErrorHandler bool
+	showFrameworkLogs      bool // Controls whether framework logs are shown
 }
 
 // NewServerBuilder creates a new ServerBuilder with the specified framework type and optional port.
 // If port is provided, it will be used; otherwise, you must call WithDefaultPort before Build.
 func NewServerBuilder(frameworkType core.FrameworkType, port ...string) *ServerBuilder {
 	builder := &ServerBuilder{
-		frameworkType:    frameworkType,
-		controllers:      make([]core.Controller, 0),
-		middleware:       make([]core.HandlerFunc, 0),
-		noRouteHandlers:  make([]core.HandlerFunc, 0),
-		noMethodHandlers: make([]core.HandlerFunc, 0),
+		frameworkType:     frameworkType,
+		controllers:       make([]core.Controller, 0),
+		middleware:        make([]core.HandlerFunc, 0),
+		noRouteHandlers:   make([]core.HandlerFunc, 0),
+		noMethodHandlers:  make([]core.HandlerFunc, 0),
+		showFrameworkLogs: true, // Default to showing framework logs
 	}
 
 	// If port is provided, set it
@@ -98,11 +100,19 @@ func findAvailablePort() string {
 	return "8080"
 }
 
-// WithDefaultPort sets a default port for the server.
+// WithDefaultRandomPort sets a random available port for the server.
 // This method automatically finds an available port between 8000 and 9000.
 // This method must be called if no port was provided in NewServerBuilder.
-func (b *ServerBuilder) WithDefaultPort() *ServerBuilder {
+func (b *ServerBuilder) WithDefaultRandomPort() *ServerBuilder {
 	b.port = findAvailablePort()
+	b.portSet = true
+	return b
+}
+
+// WithDefaultPort sets the default port (8080) for the server.
+// This method must be called if no port was provided in NewServerBuilder.
+func (b *ServerBuilder) WithDefaultPort() *ServerBuilder {
+	b.port = "8080"
 	b.portSet = true
 	return b
 }
@@ -216,6 +226,15 @@ func (b *ServerBuilder) WithDefaultErrorHandling() *ServerBuilder {
 	return b
 }
 
+// WithFrameworkLogs controls whether framework logs are shown.
+// If enabled is true, logs about the framework, middleware, and routes will be printed to the console.
+// If enabled is false, these logs will be suppressed.
+// By default, framework logs are enabled.
+func (b *ServerBuilder) WithFrameworkLogs(enabled bool) *ServerBuilder {
+	b.showFrameworkLogs = enabled
+	return b
+}
+
 // WithNoRoute configures custom handlers for 404 Not Found errors.
 func (b *ServerBuilder) WithNoRoute(handlers ...core.HandlerFunc) *ServerBuilder {
 	b.noRouteHandlers = handlers
@@ -236,7 +255,7 @@ func (b *ServerBuilder) Build() (core.Server, error) {
 	}
 
 	// Create a new server
-	server, err := NewServer(b.frameworkType, b.port)
+	server, err := NewServer(b.frameworkType, b.port, b.showFrameworkLogs)
 	if err != nil {
 		return nil, err
 	}
