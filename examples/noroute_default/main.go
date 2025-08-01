@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Create a new server without explicitly setting NoRoute or NoMethod handlers
-	srv, err := server.NewServer(server.FrameworkGin, "8080")
+	srv, err := server.NewServer(server.FrameworkGin, "8080", false)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}

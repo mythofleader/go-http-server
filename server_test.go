@@ -9,7 +9,7 @@ import (
 )
 
 func TestNewServer(t *testing.T) {
-	s, err := NewServer(core.FrameworkGin, "8080")
+	s, err := NewServer(core.FrameworkGin, "8080", false)
 	if err != nil {
 		t.Fatalf("NewServer(core.FrameworkGin, \"8080\") returned error: %v", err)
 	}
@@ -20,7 +20,7 @@ func TestNewServer(t *testing.T) {
 
 func TestNewServerWithFramework(t *testing.T) {
 	// Test with Gin
-	s, err := NewServer(core.FrameworkGin, "8080")
+	s, err := NewServer(core.FrameworkGin, "8080", false)
 	if err != nil {
 		t.Fatalf("NewServer(core.FrameworkGin, \"8080\") returned error: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestNewServerWithFramework(t *testing.T) {
 	}
 
 	// Test with StdHTTP
-	s, err = NewServer(core.FrameworkStdHTTP, "8080")
+	s, err = NewServer(core.FrameworkStdHTTP, "8080", false)
 	if err != nil {
 		t.Fatalf("NewServer(core.FrameworkStdHTTP, \"8080\") returned error: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestNewServerWithFramework(t *testing.T) {
 	}
 
 	// Test with invalid framework
-	s, err = NewServer(core.FrameworkType("invalid"), "8080")
+	s, err = NewServer(core.FrameworkType("invalid"), "8080", false)
 	if err == nil {
 		t.Fatal("NewServer(\"invalid\", \"8080\") did not return error")
 	}

@@ -147,7 +147,7 @@ func (s *LegacyUserService) LookupUserByJWT(claims server.MapClaims) (interface{
 
 func main() {
 	// Create a new server
-	srv, err := server.NewServer(server.FrameworkStdHTTP, "8080")
+	srv, err := server.NewServer(server.FrameworkStdHTTP, "8080", false)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}

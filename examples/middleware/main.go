@@ -47,7 +47,7 @@ func AnotherMiddleware() server.HandlerFunc {
 
 func main() {
 	// Create a new server
-	s, err := server.NewServer(server.FrameworkGin, "8080")
+	s, err := server.NewServer(server.FrameworkGin, "8080", false)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}

@@ -26,12 +26,12 @@ func main() {
 
 	switch *framework {
 	case "gin":
-		s, err = server.NewServer(server.FrameworkGin, *port)
+		s, err = server.NewServer(server.FrameworkGin, *port, false)
 	case "std":
-		s, err = server.NewServer(server.FrameworkStdHTTP, *port)
+		s, err = server.NewServer(server.FrameworkStdHTTP, *port, false)
 	default:
 		// Default to Gin
-		s, err = server.NewServer(server.FrameworkGin, *port)
+		s, err = server.NewServer(server.FrameworkGin, *port, false)
 	}
 
 	if err != nil {

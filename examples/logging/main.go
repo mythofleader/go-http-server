@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// Create a new server using the standard HTTP implementation
-	srv, err := server.NewServer(server.FrameworkStdHTTP, "8081")
+	srv, err := server.NewServer(server.FrameworkStdHTTP, "8081", false)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}
